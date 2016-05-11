@@ -48,6 +48,10 @@ class SurveyController < ApplicationController
   end
 
   def result
+    respond_to do |format|
+      format.html
+      format.csv { send_data @survey.to_csv }
+    end
   end
 
   def destroy

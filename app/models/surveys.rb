@@ -1,3 +1,5 @@
+require 'csv'
+
 class Surveys < ActiveRecord::Base
   belongs_to :group
   has_many :questions, -> { order(:no) }, :dependent => :destroy, :autosave => true
@@ -13,6 +15,18 @@ class Surveys < ActiveRecord::Base
   def create_hash_key
     if self.hash_key.blank?
       self.hash_key = Digest::MD5.hexdigest(self.name + Time.now.to_s)
+    end
+  end
+
+  def to_csv
+    surveyAttributes = %w{id name}
+    questionAttributes = %w{text type value image}
+    surveyArr = self.attributes.values_at(*surveyAttributes)
+    questionArr = self.questions.first.attributes.values_at(*questionAttributes)
+
+    CSV.generate(headers: true) do |csv|
+      csv << surveyAttributes + questionAttributes
+      csv << surveyArr + questionArr
     end
   end
 end
